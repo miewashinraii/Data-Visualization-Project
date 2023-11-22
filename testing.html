@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navigating the Mental Health Landscape: A Global Perspective</title>
     <link rel="stylesheet" href="style3.css">
-    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
 </head>
 <body>
     <div id="nav">
@@ -18,16 +18,19 @@
             <header class="header">
                 <div class="title"><br><b>Navigating the Mental Health Landscape:</b>
                     <br> A Global Perspective</div>
+                <p>by <i><u>Amirah Hani</u> (20000440), <u>Yazmin Sunny</u> (19001546), <u>Farah Sofea</u> (19001412)</i></p>
             </header>
             <div class="image-container">
                 <img src="assets/images/Header_MiddleGround_02.gif">
                 <span class="tooltiptext">— Explore global information on mental health issues while unveiling the personal <br>confessions of individuals facing mental health disorders worldwide.</span>
-                <!-- <h5>—Explore global information on mental health issues <br>while unveiling the personal confessions of individuals <br>facing mental health disorders worldwide.</h5> -->
             </div>
         </section>
 
         <section class="two">
             <h1 class="map-title">Global Mental Health Prevalence, 2019</h1>
+            <h4>High global prevalence of mental illness, affecting over 10% of populations in over half of the world's nations, reflects a universal human experience,<br>
+                  encompassing conditions like depression, anxiety, schizophrenia, bipolar, and eating disorders. <br>
+                <br><i><b>(World Health Organization, 2022)</i></b></h4>
             <!-- Tooltip element -->
             <div class="tooltip"></div>
             <script src="https://d3js.org/d3.v6.js"></script>
@@ -174,28 +177,25 @@
         </section>
 
         <section class="three">
-            <script src="https://d3js.org/d3.v6.min.js"></script>
+            <script src="https://d3js.org/d3.v4.js"></script>
             <div>
                 <h1>Global Mental Health Prevalence (1990-2019)</h1>
                 <label for="countryDropdown">Select Country:</label>
                 <select id="countryDropdown"></select>
             </div>
-            
-            <div id="chart"></div>
-            <div class="tooltip"></div>
-            <script src="https://d3js.org/d3.v4.js"></script>
             <div id="chart"></div>
             <div class="tooltip"></div>
             <script>
+                var d3v4=d3
                 // Assuming your data is stored in a variable called 'data'
                 // Replace 'data' with your actual variable name
                 d3.csv('assets/datasets/1- mental-illnesses-prevalence.csv', function(data){
                     // Extract unique country names for the dropdown
                     var countries = Array.from(new Set(data.map(d => d.Country)));
-            
+           
                     // Populate the dropdown with country options
                     var dropdown = d3.select('#countryDropdown');
-            
+           
                     dropdown
                         .selectAll('option')
                         .data(countries)
@@ -203,25 +203,25 @@
                         .append('option')
                         .text(d => d)
                         .attr('value', d => d);
-            
+           
                     // Set initial country selection
                     var selectedCountry = countries[0];
-            
+           
                     // Filter data based on the selected country
                     var filteredData = data.filter(d => d.Country === selectedCountry);
-            
+           
                     // Set up chart dimensions
-                    var margin = { top: 20, right: 20, bottom: 30, left: 50 },
+                    var margin = { top: 20, right: 20, bottom: 60, left: 50 },
                         width = 1000 - margin.left - margin.right,
                         height = 400 - margin.top - margin.bottom;
-            
+           
                     // Set up scales
                     var xScale = d3.scaleBand().range([0, width]).padding(0.1);
                     var yScale = d3.scaleLinear().range([height, 0]);
-            
+           
                     // Set up color scale for stacked bars
                     var colorScale = d3.scaleOrdinal(['#1E2F23','#3A5A40','#588157','#8BB174','#B5CA8D']);
-            
+           
                     // Append an SVG element to the chart div
                     var svg = d3.select("#chart")
                         .append("svg")
@@ -229,7 +229,7 @@
                         .attr("height", height + margin.top + margin.bottom)
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-            
+           
                     // Format the data
                     data.forEach(function (d) {
                         d.Year = +d.Year;
@@ -240,128 +240,169 @@
                         d.Bipolar = +d.Bipolar;
                         d['Eating disorder'] = +d['Eating disorder'];
                     });
-            
+           
                     // Update the filtered data when the dropdown selection changes
                     dropdown.on('change', function () {
                         selectedCountry = this.value;
                         updateChart();
                     });
-            
+           
                     // Function to update the chart based on the selected country
                     function updateChart() {
                         filteredData = data.filter(d => d.Country === selectedCountry);
                         redrawStackedBarChart();
                     }
-            
+           
                     // Function to remove existing chart elements and redraw the stacked bar chart
                     function redrawStackedBarChart() {
                         // Remove existing chart elements
                         svg.selectAll(".bar-group").remove();
                         svg.selectAll(".x-axis").remove();
                         svg.selectAll(".y-axis").remove();
-            
+           
                         // Redraw the stacked bar chart
                         drawStackedBarChart();
                     }
-            
+           
                     // Function to draw the stacked bar chart
                     function drawStackedBarChart() {
-                    // Set the domain of the scales
-                    xScale.domain(filteredData.map(d => d.Year));
-                    yScale.domain([0, d3.max(filteredData, function (d) {
-                        return d.Schizophrenia + d.Depressive + d.Anxiety + d.Bipolar + d['Eating disorder'];
-                    })]);
-        
-                    // Create a stack generator
-                    var stack = d3.stack()
-                        .keys(['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating disorder'])
-                        .order(d3.stackOrderNone)
-                        .offset(d3.stackOffsetNone);
-        
-                    // Generate the stacked data
-                    var stackedData = stack(filteredData);
-        
-                    // Create groups for each stacked bar
-                    var groups = svg.selectAll("g.bar-group")
-                        .data(stackedData)
-                        .enter()
-                        .append("g")
-                        .attr("class", "bar-group")
-                        .style("fill", function (d) {
-                            return colorScale(d.key);
-                        });
-                
-                    // Create tooltip
-                    var tooltip = d3.select("body")
-                        .append("div")
-                        .style("position", "absolute")
-                        .style("background-color", "white")
-                        .style("border", "1px solid black")
-                        .style("border-radius", "5px")
-                        .style("padding", "5px")
-                        .style("visibility", "hidden");
-        
-        
-        
-                    // Create and append the stacked bars
-                    groups.selectAll("rect")
-                        .data(function (d) {
-                            return d;
-                        })
-                        .enter()
-                        .append("rect")
-                        .attr("x", function (d) {
-                            return xScale(d.data.Year);
-                        })
-                        .attr("y", function (d) {
-                            return yScale(d[1]);
-                        })
-                        .attr("height", function (d) {
-                            return yScale(d[0]) - yScale(d[1]);
-                        })
-                        .attr("width", xScale.bandwidth())
-                        .on("mouseover", function (event, d) {
-                            console.log(d);
-                            tooltip.style("visibility", "visible");
-                            tooltip.text("Year: " + d.data.Year +
-                                        "\nMental Disorder: " + d3.select(this.parentNode).datum().key +
-                                        "\nValue: " + (d[1] - d[0]).toFixed(2) + "%"); // Use d.data[d.key] to get the value
-                        })
-                        .on("mousemove", function () {
-                            tooltip.style("top", (d3.event.pageY - 20) + "px")
-                                .style("left", (d3.event.pageX + 20) + "px");
-                        })
-                        .on("mouseout", function () {
-                            tooltip.style("visibility", "hidden");
-                        });
-        
-                    // Create X-axis
-                    svg.append("g")
-                        .attr("class", "x-axis")
-                        .attr("transform", "translate(0," + height + ")")
-                        .call(d3.axisBottom(xScale));
-        
-                    // Create Y-axis
-                    svg.append("g")
-                        .attr("class", "y-axis")
-                        .call(d3.axisLeft(yScale));
+                        // Set the domain of the scales
+                        xScale.domain(filteredData.map(d => d.Year));
+                        yScale.domain([0, d3.max(filteredData, function (d) {
+                            return d.Schizophrenia + d.Depressive + d.Anxiety + d.Bipolar + d['Eating disorder'];
+                        })]);
+ 
+                        // Create a stack generator
+                        var stack = d3.stack()
+                            .keys(['Schizophrenia', 'Depressive', 'Anxiety', 'Bipolar', 'Eating disorder'])
+                            .order(d3.stackOrderNone)
+                            .offset(d3.stackOffsetNone);
+           
+                        // Generate the stacked data
+                        var stackedData = stack(filteredData);
+           
+                        // Create groups for each stacked bar
+                        var groups = svg.selectAll("g.bar-group")
+                            .data(stackedData)
+                            .enter()
+                            .append("g")
+                            .attr("class", "bar-group")
+                            .style("fill", function (d) {
+                                return colorScale(d.key);
+                            });
+                        // Create tooltip
+                        var tooltip = d3.select("body")
+                            .append("div")
+                            .style("position", "absolute")
+                            .style("background-color", "white")
+                            .style("border", "1px solid black")
+                            .style("border-radius", "5px")
+                            .style("padding", "5px")
+                            .style("visibility", "hidden");
+ 
+                        // Create and append the stacked bars
+                        groups.selectAll("rect")
+                            .data(function (d) {
+                                return d;
+                            })
+                            .enter()
+                            .append("rect")
+                            .attr("x", function (d) {
+                                return xScale(d.data.Year);
+                            })
+                            .attr("y", function (d) {
+                                return yScale(d[1]);
+                            })
+                            .attr("height", function (d) {
+                                return yScale(d[0]) - yScale(d[1]);
+                            })
+                            .attr("width", xScale.bandwidth())
+                            // .on("mouseover", function (d) {
+                            //     tooltip.style("visibility", "visible");
+                            //     tooltip.text("Mental Disorder: " + d3.select(this.parentNode).datum().key + " ||" +
+                            //         "\nValue: " +  (d[1] - d[0]).toFixed(2) + "%"); // Use d.data[d.key] to get the value
+                            //     })
+                            .on("mouseover", function (event, d) {
+                                tooltip.style("visibility", "visible");
+                                var percentage = ((d[1] - d[0])).toFixed(2); 
+                                tooltip.text("Mental Disorder: " + d3.select(this.parentNode).datum().key + " ||" +
+                                    "\nValue: " + percentage + "%");
+                            })
+                            .on("mousemove", function (event, d) {
+                                tooltip.style("top", (event.y - 20) + "px")
+                                    .style("left", (event.x + 20) + "px");
+                            })
+                            .on("mouseout", function () {
+                                tooltip.style("visibility", "hidden");
+                            });
+           
+                        // Create X-axis
+                        svg.append("g")
+                            .attr("class", "x-axis")
+                            .attr("transform", "translate(0," + height + ")")
+                            .call(d3.axisBottom(xScale));
+           
+                        // Create Y-axis
+                        svg.append("g")
+                            .attr("class", "y-axis")
+                            .call(d3.axisLeft(yScale));
                     }
-        
-                // Draw the initial stacked bar chart
-                drawStackedBarChart();
+           
+                    // Draw the initial stacked bar chart
+                    drawStackedBarChart();
+                        // X-axis title
+                        svg.append("text")
+                        .attr("x", width / 2)
+                        .attr("y", height + 45)
+                        .style("text-anchor", "middle")
+                        .style("font-size", 14)
+                        .text("Year")
+                        .style("font-weight",600);
+    
+                    // Y-axis title
+                    svg.append("text")
+                        .attr("transform", "rotate(-90)")
+                        .attr("x", -height / 2)
+                        .attr("y", -margin.left + 20)
+                        .style("text-anchor", "middle")
+                        .style("font-size", 14)
+                        .text("Prevalence Rate(%)")
+                        .style("font-weight",600);
+            
+                    
                 });
             </script>
+                       <h7>Continuing from the detailed prevalence map provided earlier, a nuanced examination reveals
+                            a consistent trend across multiple years and countries. <br>
+                            Notably, more than 50% of the prevalence is consistently attributed to depression and anxiety, underscoring the 
+                            pervasive nature of these mental health challenges.<br>
+           
+                       Intriguingly, while eating disorders, schizophrenia, and bipolar disorders constitute a smaller proportion of the overall mental health landscape, their prevalence has remained
+                        relatively stable over the years.<br><br>
+                        <b>This suggests a persistent and perhaps overlooked aspect of mental health—a substantial number of cases appear to have not progressed towards recovery.</b>
+                       </h7>
         </section>
 
         <section class="four">
             <script src="https://d3js.org/d3.v6.min.js"></script>
-            <div id="another_dataviz"></div>
             <h1>Comparative Analysis: Mental Disorders and Countries </h1>
+            <h6>This chart highlights the global burden of mental disorders,<br>
+                 revealing that some of the most  prevalent mental disorders,<br>
+                  including major depressive disorder, anxiety disorders, and <br>
+                  substance use disorders, affect at least 66 countries each. <br><br>
+
+                It is evident that Attention-Deficit / Hyperactivity Disorder (ADHD) <br>
+                    is prevelant in most of the countries as it is one of the most common <br>
+                    neurodevelopment disorders of childhood and often lasts into adulthood <br>
+                    <br><b><i>(Center for Disease Control and Prevention, 2023).</i></b><br>
+                <br><b>Source: <i>Kaggle, Mental Health</i></b></h6>
+                    
+            <div id="another_dataviz"></div>
                 <script>
                 // set the dimensions and margins of the graph
                     const margin = {top: 10, right: 30, bottom: 110, left: 60},
-                        width1 = 700 - margin.left - margin.right,
-                        height1 = 400 - margin.top - margin.bottom;
+                        width1 = 800 - margin.left - margin.right,
+                        height1 = 500 - margin.top - margin.bottom;
             
                     // append the svg object to the body of the page
                     const svg1 = d3.select("#another_dataviz")
@@ -435,6 +476,24 @@
                         .duration(200)
                         .attr("transform", "scale(1)");
                     }
+                    // X-axis title
+                    svg1.append("text")
+                        .attr("x", width1 / 2)
+                        .attr("y", height1 + margin.bottom)
+                        .style("text-anchor", "middle")
+                        .style("font-size", 14)
+                        .text("Mental Disorders")
+                        .style("font-weight",600);
+    
+                    // Y-axis title
+                    svg1.append("text")
+                        .attr("transform", "rotate(-90)")
+                        .attr("x", -height1 / 2)
+                        .attr("y", -margin.left + 20)
+                        .style("text-anchor", "middle")
+                        .style("font-size", 14)
+                        .text("No. of Countries")
+                        .style("font-weight",600);
             
                     })
                 </script>
