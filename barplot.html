@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Load d3.js version 7 -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <title>Lab 1: Lesson 1</title>
+    <style>
+        /* Add a class for the highlighted bar */
+        .highlighted-bar {
+            fill: #0A2E33; /* Change the color as desired */
+        }
+    </style>
+</head>
+<body style="background-color:#daddd8">
+    <div id="my_dataviz"></div>
+    <script>
+       // set the dimensions and margins of the graph
+        const margin = {top: 10, right: 30, bottom: 110, left: 60},
+            width = 700 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        const svg = d3.select("#my_dataviz")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Parse the Data
+        d3.csv("numberofcountriesbymental.csv").then( function(data) {
+
+        // X axis
+        const x = d3.scaleBand()
+        .range([ 0, width ])
+        .domain(data.map(d => d.Entity))
+        .padding(0.2);
+        svg.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+            .attr("transform", "translate(-10,0)rotate(-45)")
+            .style("text-anchor", "end");
+
+        // Add Y axis
+        const y = d3.scaleLinear()
+        .domain([0, 185])
+        .range([ height, 0]);
+        svg.append("g")
+        .call(d3.axisLeft(y));
+
+        // Bars with Tooltip and Hover Effect
+        svg.selectAll("mybar")
+        .data(data)
+        .join("rect")
+            .attr("x", d => x(d.Entity))
+            .attr("width", x.bandwidth())
+            .attr("fill", "#15616d")
+            .attr("height", d => height - y(0))
+            .attr("y", d => y(0))
+            .on("mouseover", handleMouseOver)
+            .on("mouseout", handleMouseOut)
+            // Tooltip
+            .append("title")
+            .text(d => `Number of countries: ${d.Number}`);
+
+        // Animation
+        svg.selectAll("rect")
+            .transition()
+            .duration(800)
+            .attr("y", d => y(d.Number))
+            .attr("height", d => height - y(d.Number))
+            .delay((d,i) => i * 100);
+
+        // Function to handle mouseover event
+        function handleMouseOver(event, d) {
+            // Show the tooltip
+            d3.select(this)
+                .attr("class", "highlighted-bar")
+                .transition()
+                .duration(200)
+                .attr("transform", "scale(1.01)"); // Scale up the bar // Apply the highlighted bar class
+        }
+
+        // Function to handle mouseout event
+        function handleMouseOut(event, d) {
+            // Hide the tooltip
+            d3.select(this)
+            .attr("class", "") // Remove the highlighted bar class
+            .transition()
+            .duration(200)
+            .attr("transform", "scale(1)");
+        }
+
+        })
+    </script>
+
+    
+</body>
+</html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scrolling Through Sanity: Unraveling the Social Media-Mind Connection</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="style2.css">
     <script src="https://d3js.org/d3.v4.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
@@ -16,6 +16,25 @@
             <!-- <li><a href="#">Choropleth Chart</a></li> -->
         </ul>
     </header>
+    <style>
+        #tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            pointer-events: none;
+            display: none;
+        }
+        #ChoroChart {
+            width: 1000;
+            height: 800;
+            border: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
     <svg id="ChoroChart" width="1000" height="800"></svg>
     <div id="tooltip" class="tooltip"></div>
     <script>
@@ -27,7 +46,7 @@
         // Setting the path & projection
         var path = d3.geoPath();
         var projection = d3.geoMercator()
-            .scale(200)
+            .scale(125)
             .center([0, 0])
             .translate([width / 2, height / 2]);
 
@@ -40,7 +59,7 @@
         // Load two external data files using d3.queue()
         d3.queue()
             .defer(d3.json, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
-            .defer(d3.csv, "1- mental-illnesses-prevalence.csv", function(d) { data.set(d.Code, +d.Schizophrenia); })
+            .defer(d3.csv, "mental_illness.csv", function(d) { data.set(d.Code, +d.Schizophrenia); })
             .await(ready);
 
         // Boating the data & drawing the map
@@ -125,12 +144,12 @@
             .attr("fill", function (d) {
                 d.total = data.get(d.id) || 0;
                 return colorScale(d.total);
-            })
+})
             .on("mouseover", function (event, d) {
                 tooltip.transition()
                     .duration(200)
                     .style("opacity", .9);
-                tooltip.html(d.Country + "<br>Population: " + d.Schizophrenia)
+                tooltip.html("Country : " + d.Code +  "<br>Population: " + (data.get(d.Schizophrenia) || 0))
                     .style("left", (event.pageX) + "px")
                     .style("top", (event.pageY - 28) + "px");
             })
